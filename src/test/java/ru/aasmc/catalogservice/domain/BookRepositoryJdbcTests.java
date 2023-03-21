@@ -4,8 +4,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.jdbc.core.JdbcAggregateTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import ru.aasmc.catalogservice.config.DataConfig;
 
@@ -16,7 +17,7 @@ import java.util.stream.StreamSupport;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-@DataJdbcTest
+@DataJpaTest
 @Import(DataConfig.class)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ActiveProfiles("integration")
@@ -26,18 +27,20 @@ public class BookRepositoryJdbcTests {
     private BookRepository bookRepository;
 
     @Autowired
-    private JdbcAggregateTemplate jdbcAggregateTemplate;
+    private TestEntityManager entityManager;
+
 
     @Test
     void findAllBooks() {
         var book1 = Book.of("1234561235", "Title", "Author", 12.90, "Polarsophia");
         var book2 = Book.of("1234561236", "Another Title", "Author", 12.90, "Polarsophia");
-        jdbcAggregateTemplate.insert(book1);
-        jdbcAggregateTemplate.insert(book2);
+        entityManager.persist(book1);
+        entityManager.persist(book2);
 
         Iterable<Book> actualBooks = bookRepository.findAll();
+
         assertThat(StreamSupport.stream(actualBooks.spliterator(), true)
-                .filter(book -> book.isbn().equals(book1.isbn()) || book.isbn().equals(book2.isbn()))
+                .filter(book -> book.getIsbn().equals(book1.getIsbn()) || book.getIsbn().equals(book2.getIsbn()))
                 .collect(Collectors.toList())).hasSize(2);
     }
 
@@ -45,12 +48,12 @@ public class BookRepositoryJdbcTests {
     void findBookByIsbnWhenExisting() {
         var bookIsbn = "1234561237";
         var book = Book.of(bookIsbn, "Title", "Author", 12.90, "Polarsophia");
-        jdbcAggregateTemplate.insert(book);
+        entityManager.persist(book);
 
         Optional<Book> actualBook = bookRepository.findByIsbn(bookIsbn);
 
         assertThat(actualBook).isPresent();
-        assertThat(actualBook.get().isbn()).isEqualTo(book.isbn());
+        assertThat(actualBook.get().getIsbn()).isEqualTo(book.getIsbn());
     }
 
     @Test
@@ -63,7 +66,7 @@ public class BookRepositoryJdbcTests {
     void existsByIsbnWhenExisting() {
         var bookIsbn = "1234561239";
         var bookToCreate = Book.of(bookIsbn, "Title", "Author", 12.90, "Polarsophia");
-        jdbcAggregateTemplate.insert(bookToCreate);
+        entityManager.persist(bookToCreate);
 
         boolean existing = bookRepository.existsByIsbn(bookIsbn);
 
@@ -80,11 +83,12 @@ public class BookRepositoryJdbcTests {
     void deleteByIsbn() {
         var bookIsbn = "1234561241";
         var bookToCreate = Book.of(bookIsbn, "Title", "Author", 12.90, "Polarsophia");
-        var persistedBook = jdbcAggregateTemplate.insert(bookToCreate);
+        var persistedBook = entityManager.persist(bookToCreate);
 
         bookRepository.deleteByIsbn(bookIsbn);
 
-        assertThat(jdbcAggregateTemplate.findById(persistedBook.id(), Book.class)).isNull();
+        assertThat(entityManager.find(Book.class, persistedBook.getId())).isNull();
     }
+
 
 }

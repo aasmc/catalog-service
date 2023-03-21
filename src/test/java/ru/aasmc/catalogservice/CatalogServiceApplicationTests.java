@@ -36,7 +36,7 @@ class CatalogServiceApplicationTests {
                 .expectStatus().is2xxSuccessful()
                 .expectBody(Book.class).value(actualBook -> {
                     assertThat(actualBook).isNotNull();
-                    assertThat(actualBook.isbn()).isEqualTo(expectedBook.isbn());
+                    assertThat(actualBook.getIsbn()).isEqualTo(expectedBook.getIsbn());
                 });
     }
 
@@ -52,7 +52,7 @@ class CatalogServiceApplicationTests {
                 .expectStatus().isCreated()
                 .expectBody(Book.class).value(actualBook -> {
                     assertThat(actualBook).isNotNull();
-                    assertThat(actualBook.isbn()).isEqualTo(expectedBook.isbn());
+                    assertThat(actualBook.getIsbn()).isEqualTo(expectedBook.getIsbn());
                 });
     }
 
@@ -68,18 +68,17 @@ class CatalogServiceApplicationTests {
                 .expectStatus().isCreated()
                 .expectBody(Book.class).value(book -> assertThat(book).isNotNull())
                 .returnResult().getResponseBody();
-        var bookToUpdate = new Book(createdBook.id(), createdBook.isbn(), createdBook.title(), createdBook.author(), 7.95,
-                createdBook.publisher(), createdBook.createdDate(), createdBook.lastModifiedDate(), createdBook.version());
+        createdBook.setPrice(7.95);
 
         webTestClient
                 .put()
                 .uri("/books/" + bookIsbn)
-                .bodyValue(bookToUpdate)
+                .bodyValue(createdBook)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(Book.class).value(actualBook -> {
                     assertThat(actualBook).isNotNull();
-                    assertThat(actualBook.price()).isEqualTo(bookToUpdate.price());
+                    assertThat(actualBook.getPrice()).isEqualTo(createdBook.getPrice());
                 });
     }
 
