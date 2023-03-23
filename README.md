@@ -1,28 +1,86 @@
-# Catalog Service (Polar Book Shop)
+# Catalog Service
 
-Educational project based on the book Cloud Native Spring in Action by ThomasVitale.
+This application is part of the Polar Bookshop system and provides the functionality for managing
+the books in the bookshop catalog. It's part of the project built in the
+[Cloud Native Spring in Action](https://www.manning.com/books/cloud-native-spring-in-action) book
+by [Thomas Vitale](https://www.thomasvitale.com).
 
-GitHub repo with code examples from the book: https://github.com/ThomasVitale/cloud-native-spring-in-action
+## REST API
 
-### Service responsibilities:
-1. View the list of books in the catalog.
-2. earch books by their International Standard Book Number (ISBN).
-3. Add a new book to the catalog.
-4. Edit information for an existing book.
-5. Remove a book from the catalog.
+| Endpoint	      | Method   | Req. body  | Status | Resp. body     | Description    		   	     |
+|:---------------:|:--------:|:----------:|:------:|:--------------:|:-------------------------------|
+| `/books`        | `GET`    |            | 200    | Book[]         | Get all the books in the catalog. |
+| `/books`        | `POST`   | Book       | 201    | Book           | Add a new book to the catalog. |
+|                 |          |            | 422    |                | A book with the same ISBN already exists. |
+| `/books/{isbn}` | `GET`    |            | 200    | Book           | Get the book with the given ISBN. |
+|                 |          |            | 404    |                | No book with the given ISBN exists. |
+| `/books/{isbn}` | `PUT`    | Book       | 200    | Book           | Update the book with the given ISBN. |
+|                 |          |            | 201    | Book           | Create a book with the given ISBN. |
+| `/books/{isbn}` | `DELETE` |            | 204    |                | Delete the book with the given ISBN. |
 
-### Endpoints:
-1. /books GET:
-   1. 200 returns BookCollection, gets all books in the catalog
-2. /books POST:
-   1. 201 returns Book, adds a new book to the collection, 
-   2. 422 - a book with the given ISBN already exists.  
-3. /books/{isbn} GET:
-   1. 200 returns Book, gets the book with the given ISBN
-   2. 404 no book with the given ISBN exists
-4. /books/{isbn} PUT:
-   1. 200 returns Book, updates the book with the given ISBN
-   2. 201 returns Book, creates a book with the given ISBN
-5. /books/{isbn} DELETE:
-   1. 204 deletes the book with the given ISBN
+## Useful Commands
 
+| Gradle Command	         | Description                                   |
+|:---------------------------|:----------------------------------------------|
+| `./gradlew bootRun`        | Run the application.                          |
+| `./gradlew build`          | Build the application.                        |
+| `./gradlew test`           | Run tests.                                    |
+| `./gradlew bootJar`        | Package the application as a JAR.             |
+| `./gradlew bootBuildImage` | Package the application as a container image. |
+
+After building the application, you can also run it from the Java CLI:
+
+```bash
+java -jar build/libs/catalog-service-0.0.1-SNAPSHOT.jar
+```
+
+## Running a PostgreSQL Database
+
+Run PostgreSQL as a Docker container
+
+```bash
+docker run -d \
+    --name polar-postgres \
+    -e POSTGRES_USER=user \
+    -e POSTGRES_PASSWORD=password \
+    -e POSTGRES_DB=polardb_catalog \
+    -p 5432:5432 \
+    postgres:14.4
+```
+
+### Container Commands
+
+| Docker Command	                     | Description       |
+|:------------------------------------|:-----------------:|
+| `docker stop polar-postgres`        | Stop container.   |
+| `docker start polar-postgres`       | Start container.  |
+| `docker remove polar-postgres`      | Remove container. |
+
+### Database Commands
+
+Start an interactive PSQL console:
+
+```bash
+docker exec -it polar-postgres psql -U user -d polardb_catalog
+```
+
+| PSQL Command	              | Description                                    |
+|:---------------------------|:-----------------------------------------------|
+| `\list`                    | List all databases.                            |
+| `\connect polardb_catalog` | Connect to specific database.                  |
+| `\dt`                      | List all tables.                               |
+| `\d book`                  | Show the `book` table schema.                  |
+| `\d flyway_schema_history` | Show the `flyway_schema_history` table schema. |
+| `\quit`                    | Quit interactive psql console.                 |
+
+From within the PSQL console, you can also fetch all the data stored in the `book` table.
+
+```bash
+select * from book;
+```
+
+The following query is to fetch all the data stored in the `flyway_schema_history` table.
+
+```bash
+select * from flyway_schema_history;
+```
