@@ -84,3 +84,14 @@ The following query is to fetch all the data stored in the `flyway_schema_histor
 ```bash
 select * from flyway_schema_history;
 ```
+
+### Publishing the image 
+To publish the docker image to GitHub Packages:
+```bash
+$ ./gradlew bootBuildImage \
+--imageName ghcr.io/<your_github_username>/catalog-service \
+--publishImage \
+-PregistryUrl=ghcr.io \
+-PregistryUsername=<your_github_user \
+-PregistryToken=<your_github_token>
+```
