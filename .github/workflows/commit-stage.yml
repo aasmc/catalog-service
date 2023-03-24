@@ -40,7 +40,7 @@ jobs:
           ./gradlew build
 
   package:
-    name: Pachage and Publish
+    name: Package and Publish
     # runs only on the master branch
     if: ${{ github.ref == 'refs/heads/master' }}
     # runs only if the build job completes successfully
