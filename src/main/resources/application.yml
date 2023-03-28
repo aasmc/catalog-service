@@ -8,8 +8,8 @@ spring:
   cloud:
     config:
       uri: http://localhost:8888
-      request-connect-timeout: 5000 # 5s
-      request-read-timeout: 5000 # 5s
+      request-connect-timeout: 10000 # 10s
+      request-read-timeout: 10000 # 10s
       # The retry behavior is enabled only when this property is set to true
       fail-fast: false # In production set to true
       retry:
