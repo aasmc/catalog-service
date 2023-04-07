@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: catalogservice
+  name: catalog-service
   labels:
-    app: catalogservice
+    app: catalog-service
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: catalogservice
+      app: catalog-service
   template:
     metadata:
       labels:
-        app: catalogservice
+        app: catalog-service
     spec:
       containers:
-        - name: catalogservice
+        - name: catalog-service
           image: ghcr.io/aasmc/catalogservice
           imagePullPolicy: IfNotPresent
           lifecycle:
