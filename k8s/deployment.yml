@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: catalog-service
-          image: ghcr.io/aasmc/catalogservice
+          image: ghcr.io/aasmc/catalog-service
           imagePullPolicy: IfNotPresent
           lifecycle:
             preStop:
