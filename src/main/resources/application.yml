@@ -24,6 +24,13 @@ spring:
     hikari:
       connection-timeout: 2000 # ms
       maximum-pool-size: 5
+  security:
+    oauth2:
+      resourceserver:
+        # OAuth2 doesn't enforce a data format for Access Tokens, so we must
+        # be explicit about our choice. In this case, we want to use JWT.
+        jwt:
+          issuer-uri: http://localhost:8080/realms/PolarBookshop
 
 management:
   endpoints:
