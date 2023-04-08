@@ -39,13 +39,12 @@ public class BookService {
                             book.title(),
                             book.author(),
                             book.price(),
-                            existingBook.publisher(),
+                            book.publisher(),
                             existingBook.createdDate(),
-                            // will be updated automatically if the update operation succeeds
                             existingBook.lastModifiedDate(),
-                            // version will be increased automatically if the update operation succeeds
-                            existingBook.version()
-                    );
+                            existingBook.createdBy(),
+                            existingBook.lastModifiedBy(),
+                            existingBook.version());
                     return bookRepository.save(bookToUpdate);
                 })
                 .orElseGet(() -> addBookToCatalog(book));
