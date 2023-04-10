@@ -1,3 +1,13 @@
+server:
+  port: 9001
+  shutdown: graceful
+  tomcat:
+    connection-timeout: 2s
+    keep-alive-timeout: 15s
+    threads:
+      max: 50
+      min-spare: 5
+
 spring:
   application:
     name: catalog-service
@@ -8,10 +18,10 @@ spring:
   cloud:
     config:
       uri: http://localhost:8888
-      request-connect-timeout: 10000 # 10s
-      request-read-timeout: 10000 # 10s
+      request-connect-timeout: 5000 # 5s
+      request-read-timeout: 5000 # 5s
       # The retry behavior is enabled only when this property is set to true
-      fail-fast: false # In production set to true
+      fail-fast: false # In production, set to true
       retry:
         max-attempts: 6
         initial-interval: 1000 # 1s
@@ -22,7 +32,7 @@ spring:
     password: password
     url: jdbc:postgresql://localhost:5432/polardb_catalog
     hikari:
-      connection-timeout: 2000 # ms
+      connection-timeout: 2000 #ms
       maximum-pool-size: 5
   security:
     oauth2:
@@ -50,21 +60,18 @@ management:
       show-components: always
       probes:
         enabled: true
+  info:
+    env:
+      enabled: true
+    java:
+      enabled: true
+    os:
+      enabled: true
   metrics:
+    # Adds a Micrometer common tag with the application name. This results in a Prometheus label
+    # being applied to all metrics.
     tags:
-      # Adds a Micrometer common tag with the application name. This results in a Prometheus label
-      # being applied to all metrics.
       application: ${spring.application.name}
-
-server:
-  port: 9001
-  tomcat:
-    connection-timeout: 2s
-    keep-alive-timeout: 15s
-    threads:
-      max: 50
-      min-spare: 5
-  shutdown: graceful
 
 polar:
   greeting: Welcome to the local book catalog!

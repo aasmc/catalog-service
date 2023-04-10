@@ -1,16 +1,14 @@
 plugins {
-    id 'java'
     id 'org.springframework.boot' version '2.7.9'
     id 'io.spring.dependency-management' version '1.0.15.RELEASE'
+    id 'java'
 }
 
 group = 'ru.aasmc'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '17'
 
-repositories {
-    mavenCentral()
-}
+description = 'Provides functionality for managing the books in the catalog.'
 
 configurations {
     compileOnly {
@@ -18,13 +16,50 @@ configurations {
     }
 }
 
+repositories {
+    mavenCentral()
+}
+
 ext {
-    set('otelVersion', "1.17.0")
-    set('springCloudVersion', "2021.0.6")
-    set('testcontainersVersion', "1.17.3")
+    set('otelVersion', "1.19.2")
+    set('springCloudVersion', "2021.0.5")
+    set('testcontainersVersion', "1.17.6")
     set('testKeycloakVersion', "2.3.0")
 }
 
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.cloud:spring-cloud-starter-config'
+    implementation 'org.springframework.retry:spring-retry'
+    implementation 'org.flywaydb:flyway-core'
+
+    runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+    runtimeOnly "io.opentelemetry.javaagent:opentelemetry-javaagent:${otelVersion}"
+    runtimeOnly 'org.postgresql:postgresql'
+    annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-webflux'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.testcontainers:postgresql'
+    testImplementation "com.github.dasniko:testcontainers-keycloak:${testKeycloakVersion}"
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+        mavenBom "org.testcontainers:testcontainers-bom:${testcontainersVersion}"
+    }
+}
+
+springBoot {
+    buildInfo()
+}
 
 bootRun {
     systemProperty 'spring.profiles.active', 'testdata'
@@ -40,37 +75,6 @@ bootBuildImage {
             password = project.findProperty("registryToken")
             url = project.findProperty("registryUrl")
         }
-    }
-}
-
-
-dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
-    implementation 'org.springframework.cloud:spring-cloud-starter-config'
-    implementation 'org.springframework.retry:spring-retry'
-    implementation 'org.flywaydb:flyway-core'
-    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
-
-    runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
-    runtimeOnly "io.opentelemetry.javaagent:opentelemetry-javaagent:${otelVersion}"
-    runtimeOnly 'org.postgresql:postgresql'
-    annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
-
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.springframework.boot:spring-boot-starter-webflux'
-    testImplementation 'org.testcontainers:postgresql'
-    testImplementation 'org.springframework.security:spring-security-test'
-    testImplementation 'org.testcontainers:junit-jupiter'
-    testImplementation "com.github.dasniko:testcontainers-keycloak:${testKeycloakVersion}"
-}
-
-dependencyManagement {
-    imports {
-        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
-        mavenBom "org.testcontainers:testcontainers-bom:${testcontainersVersion}"
     }
 }
 
