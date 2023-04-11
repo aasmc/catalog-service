@@ -26,22 +26,23 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Testcontainers
 class CatalogServiceApplicationTests {
 
-    private static KeycloakToken bjornToken;
-    private static KeycloakToken isabelleToken;
+    // Customer
+    private static KeycloakToken bjornTokens;
+    // Customer and employee
+    private static KeycloakToken isabelleTokens;
+
+    @Autowired
+    private WebTestClient webTestClient;
 
     @Container
-    private static final KeycloakContainer keycloakContainer =
-            new KeycloakContainer("quay.io/keycloak/keycloak:19.0")
-                    .withRealmImportFile("test-realm-config.json");
+    private static final KeycloakContainer keycloakContainer = new KeycloakContainer("quay.io/keycloak/keycloak:19.0")
+            .withRealmImportFile("test-realm-config.json");
 
     @DynamicPropertySource
     static void dynamicProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.security.oauth2.resourceserver.jwt.issuer-uri",
                 () -> keycloakContainer.getAuthServerUrl() + "realms/PolarBookshop");
     }
-
-    @Autowired
-    private WebTestClient webTestClient;
 
     @BeforeAll
     static void generateAccessTokens() {
@@ -50,8 +51,8 @@ class CatalogServiceApplicationTests {
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
                 .build();
 
-        isabelleToken = authenticateWith("isabelle", "password", webClient);
-        bjornToken = authenticateWith("bjorn", "password", webClient);
+        isabelleTokens = authenticateWith("isabelle", "password", webClient);
+        bjornTokens = authenticateWith("bjorn", "password", webClient);
     }
 
     @Test
@@ -61,7 +62,7 @@ class CatalogServiceApplicationTests {
         Book expectedBook = webTestClient
                 .post()
                 .uri("/books")
-                .headers(headers -> headers.setBearerAuth(isabelleToken.accessToken))
+                .headers(headers -> headers.setBearerAuth(isabelleTokens.accessToken()))
                 .bodyValue(bookToCreate)
                 .exchange()
                 .expectStatus().isCreated()
@@ -86,7 +87,7 @@ class CatalogServiceApplicationTests {
         webTestClient
                 .post()
                 .uri("/books")
-                .headers(headers -> headers.setBearerAuth(isabelleToken.accessToken))
+                .headers(headers -> headers.setBearerAuth(isabelleTokens.accessToken()))
                 .bodyValue(expectedBook)
                 .exchange()
                 .expectStatus().isCreated()
@@ -115,11 +116,12 @@ class CatalogServiceApplicationTests {
         webTestClient
                 .post()
                 .uri("/books")
-                .headers(headers -> headers.setBearerAuth(bjornToken.accessToken()))
+                .headers(headers -> headers.setBearerAuth(bjornTokens.accessToken()))
                 .bodyValue(expectedBook)
                 .exchange()
                 .expectStatus().isForbidden();
     }
+
     @Test
     void whenPutRequestThenBookUpdated() {
         var bookIsbn = "1231231232";
@@ -127,7 +129,7 @@ class CatalogServiceApplicationTests {
         Book createdBook = webTestClient
                 .post()
                 .uri("/books")
-                .headers(headers -> headers.setBearerAuth(isabelleToken.accessToken))
+                .headers(headers -> headers.setBearerAuth(isabelleTokens.accessToken()))
                 .bodyValue(bookToCreate)
                 .exchange()
                 .expectStatus().isCreated()
@@ -140,7 +142,7 @@ class CatalogServiceApplicationTests {
         webTestClient
                 .put()
                 .uri("/books/" + bookIsbn)
-                .headers(headers -> headers.setBearerAuth(isabelleToken.accessToken))
+                .headers(headers -> headers.setBearerAuth(isabelleTokens.accessToken()))
                 .bodyValue(bookToUpdate)
                 .exchange()
                 .expectStatus().isOk()
@@ -157,7 +159,7 @@ class CatalogServiceApplicationTests {
         webTestClient
                 .post()
                 .uri("/books")
-                .headers(headers -> headers.setBearerAuth(isabelleToken.accessToken))
+                .headers(headers -> headers.setBearerAuth(isabelleTokens.accessToken()))
                 .bodyValue(bookToCreate)
                 .exchange()
                 .expectStatus().isCreated();
@@ -165,7 +167,7 @@ class CatalogServiceApplicationTests {
         webTestClient
                 .delete()
                 .uri("/books/" + bookIsbn)
-                .headers(headers -> headers.setBearerAuth(isabelleToken.accessToken))
+                .headers(headers -> headers.setBearerAuth(isabelleTokens.accessToken()))
                 .exchange()
                 .expectStatus().isNoContent();
 
@@ -179,15 +181,14 @@ class CatalogServiceApplicationTests {
                 );
     }
 
-    private static KeycloakToken authenticateWith(String username,
-                                                  String password,
-                                                  WebClient client) {
-        return client
+    private static KeycloakToken authenticateWith(String username, String password, WebClient webClient) {
+        return webClient
                 .post()
                 .body(BodyInserters.fromFormData("grant_type", "password")
                         .with("client_id", "polar-test")
                         .with("username", username)
-                        .with("password", password))
+                        .with("password", password)
+                )
                 .retrieve()
                 .bodyToMono(KeycloakToken.class)
                 .block();
@@ -199,29 +200,7 @@ class CatalogServiceApplicationTests {
         private KeycloakToken(@JsonProperty("access_token") final String accessToken) {
             this.accessToken = accessToken;
         }
+
     }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
