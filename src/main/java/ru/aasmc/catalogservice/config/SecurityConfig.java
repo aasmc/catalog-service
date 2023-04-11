@@ -16,25 +16,16 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .authorizeHttpRequests(authorize -> authorize
-                        .mvcMatchers("/actuator/**").permitAll()
-                        // Allow users to fetch greetings and books without authentication
-                        .mvcMatchers(HttpMethod.GET, "/", "/books/**")
-                        .permitAll()
-                        // any other request requires authentication and employee role
+                        .requestMatchers("/actuator/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/", "/books/**").permitAll()
                         .anyRequest().hasRole("employee")
                 )
-                // Enables OAuth2 Resource Server support using the default configuration
-                // based on JWT authentication
                 .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt)
-                // Each request must include an Access Token, so there's no need to keep a user
-                // session alive between requests. We want it to be stateless.
                 .sessionManagement(sessionManagement ->
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                // Since the authentication strategy is stateless and doesn't involve a
-                // browser based client, we can safely disable the CSRF protection.
                 .csrf(AbstractHttpConfigurer::disable)
                 .build();
     }
@@ -46,20 +37,12 @@ public class SecurityConfig {
      */
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
-        // Converter that maps claims to GrantedAuthority objects.
-        var jwtGrantedAuthoritiesConverter =
-                new JwtGrantedAuthoritiesConverter();
-        // Applies the "ROLE_" prefix to each user role
+        var jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
         jwtGrantedAuthoritiesConverter.setAuthorityPrefix("ROLE_");
-        // extracts the list of roles from the "roles" claim
         jwtGrantedAuthoritiesConverter.setAuthoritiesClaimName("roles");
 
-        var jwtAuthenticationConverter =
-                new JwtAuthenticationConverter();
-        // Defines a strategy to convert a JWT. We'll only customize hot to build
-        // granted authorities out of it.
-        jwtAuthenticationConverter
-                .setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);
+        var jwtAuthenticationConverter = new JwtAuthenticationConverter();
+        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);
         return jwtAuthenticationConverter;
     }
 
