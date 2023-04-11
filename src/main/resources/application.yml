@@ -20,7 +20,6 @@ spring:
       uri: http://localhost:8888
       request-connect-timeout: 5000 # 5s
       request-read-timeout: 5000 # 5s
-      # The retry behavior is enabled only when this property is set to true
       fail-fast: false # In production, set to true
       retry:
         max-attempts: 6
@@ -37,8 +36,6 @@ spring:
   security:
     oauth2:
       resourceserver:
-        # OAuth2 doesn't enforce a data format for Access Tokens, so we must
-        # be explicit about our choice. In this case, we want to use JWT.
         jwt:
           issuer-uri: http://localhost:8080/realms/PolarBookshop
 
@@ -68,8 +65,6 @@ management:
     os:
       enabled: true
   metrics:
-    # Adds a Micrometer common tag with the application name. This results in a Prometheus label
-    # being applied to all metrics.
     tags:
       application: ${spring.application.name}
 
