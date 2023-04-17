@@ -1,0 +1,15 @@
+# Entry point for Kustomize
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - deployment.yml
+  - service.yml
+
+configMapGenerator:
+  - name: catalog-config
+    files:
+      - application.yml
+    options:
+      labels:
+        app: catalog-service
