@@ -3,7 +3,7 @@ on: push
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: aasmc/catalogservice
+  IMAGE_NAME: aasmc/catalog-service
   VERSION: latest
 
 jobs:
