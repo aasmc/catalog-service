@@ -1,7 +1,7 @@
 # Build
 custom_build(
     # Name of the container image
-    ref = 'ghcr.io/aasmc/catalogservice',
+    ref = 'ghcr.io/aasmc/catalog-service',
     # Command to build the container image
     command = './gradlew bootBuildImage --imageName $EXPECTED_REF',
     # Files to watch that trigger a new build
